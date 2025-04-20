@@ -1,0 +1,113 @@
+import java.util.Scanner;
+
+public class CalculadoraGeometrica {
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner(System.in);
+        boolean repetir = true;
+
+        while (repetir) {
+            System.out.println("\n--- Selecciona la Unidad de Medida ---");
+            System.out.println("1) Metros\n2) Centímetros\n3) Milímetros");
+            System.out.print("Opción: ");
+            int opcionUnidad = leerOpcion(entrada, 1, 3);
+            String unidad = obtenerNombreUnidad(opcionUnidad);
+
+            System.out.println("\n--- Selecciona la Figura ---");
+            System.out.println("1) Círculo\n2) Cuadrado\n3) Triángulo\n4) Rectángulo\n5) Pentágono");
+            System.out.print("Opción: ");
+            int tipoFigura = leerOpcion(entrada, 1, 5);
+
+            System.out.println("\n--- Selecciona la Operación ---");
+            System.out.println("1) Calcular Área\n2) Calcular Perímetro\n3) Elevar valor a una potencia");
+            System.out.print("Opción: ");
+            int tipoOperacion = leerOpcion(entrada, 1, 3);
+
+            Figura figura = construirFigura(entrada, tipoFigura, tipoOperacion, unidad);
+            double resultado = switch (tipoOperacion) {
+                case 1 -> figura.calcularArea();
+                case 2 -> figura.calcularPerimetro();
+                case 3 -> {
+                    System.out.print("Introduce el exponente: ");
+                    int exponente = entrada.nextInt();
+                    yield figura.elevarAPotencia(exponente);
+                }
+                default -> 0;
+            };
+
+            System.out.printf("Resultado: %.2f %s\n", resultado, unidad);
+            System.out.print("¿Deseas realizar otro cálculo? (s/n): ");
+            entrada.nextLine();
+            String continuar = entrada.nextLine();
+            repetir = !continuar.equalsIgnoreCase("n");
+        }
+
+        entrada.close();
+        System.out.println("Programa finalizado.");
+    }
+
+    private static int leerOpcion(Scanner sc, int min, int max) {
+        int opcion;
+        do {
+            while (!sc.hasNextInt()) {
+                System.out.print("Ingresa un número válido: ");
+                sc.next();
+            }
+            opcion = sc.nextInt();
+            if (opcion < min || opcion > max) {
+                System.out.print("Opción fuera de rango. Intenta otra vez: ");
+            }
+        } while (opcion < min || opcion > max);
+        return opcion;
+    }
+
+    private static String obtenerNombreUnidad(int op) {
+        return switch (op) {
+            case 1 -> "metros";
+            case 2 -> "centímetros";
+            case 3 -> "milímetros";
+            default -> "unidades";
+        };
+    }
+
+    private static Figura construirFigura(Scanner sc, int figura, int operacion, String unidad) {
+        switch (figura) {
+            case 1 -> {
+                System.out.print("Introduce el radio del círculo en " + unidad + ": ");
+                return new Circulo(sc.nextDouble());
+            }
+            case 2 -> {
+                System.out.print("Introduce el lado del cuadrado en " + unidad + ": ");
+                return new Cuadrado(sc.nextDouble());
+            }
+            case 3 -> {
+                if (operacion == 1) {
+                    System.out.print("Base: ");
+                    double base = sc.nextDouble();
+                    System.out.print("Altura: ");
+                    double altura = sc.nextDouble();
+                    return new Triangulo(base, altura);
+                } else {
+                    System.out.print("Lado 1: ");
+                    double l1 = sc.nextDouble();
+                    System.out.print("Lado 2: ");
+                    double l2 = sc.nextDouble();
+                    System.out.print("Lado 3: ");
+                    double l3 = sc.nextDouble();
+                    return new Triangulo(l1, l2, l3);
+                }
+            }
+            case 4 -> {
+                System.out.print("Largo: ");
+                double largo = sc.nextDouble();
+                System.out.print("Ancho: ");
+                double ancho = sc.nextDouble();
+                return new Rectangulo(largo, ancho);
+            }
+            case 5 -> {
+                System.out.print("Introduce el lado del pentágono en " + unidad + ": ");
+                return new Pentagono(sc.nextDouble());
+            }
+            default -> throw new IllegalArgumentException("Figura no reconocida.");
+        }
+    }
+}
